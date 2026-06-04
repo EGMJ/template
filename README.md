@@ -99,18 +99,25 @@ docs: update deployment guide
 | CI | Push, PR | Lint, test, build |
 | PR Validation | PR | Conventional commits, title, size label |
 | Security | Push to main, weekly | CodeQL, Trivy, Gitleaks |
-| Release | Push to main | Automated versioning and changelog |
+| Create Release Branch | PR merged to develop | Creates `release/v*` branch + PR to main |
+| Release | PR merged to main (from release/* or hotfix/*) | Tag + GitHub Release |
 | Stale | Daily | Close inactive issues/PRs |
 | Auto PR | Feature branch push | Auto-create draft PRs |
 
-### Releases
+### Release Flow
 
-Releases are automated via [Release Please](https://github.com/googleapis/release-please):
+```
+feature/* ──PR──▶ develop ──auto──▶ release/v1.2.0 ──PR──▶ main ──auto──▶ tag v1.2.0 + GitHub Release
+                                                                    │
+hotfix/*  ─────────────────────────────────PR───────────────────────▶┘
+```
 
-1. Write conventional commits on feature branches
-2. Merge PRs to `main`
-3. Release Please creates a "Release PR" with changelog
-4. Merge the Release PR to publish
+1. Develop on `feature/*` branches with conventional commits
+2. Merge PR to `develop`
+3. A `release/v*` branch is auto-created with a PR to `main`
+4. Review, QA, and merge the release PR
+5. Tag and GitHub Release are created automatically
+6. For urgent fixes: `hotfix/*` → PR direct to `main`
 
 ## Documentation
 

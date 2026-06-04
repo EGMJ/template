@@ -1,0 +1,104 @@
+# Creates a release/v* branch when a PR is merged into develop
+# This prepares the next release for promotion to main
+name: Create Release Branch
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [develop]
+
+permissions:
+  contents: write
+
+jobs:
+  create-release-branch:
+    name: Create release branch
+    runs-on: ubuntu-latest
+    if: >
+      github.event.pull_request.merged == true &&
+      !startsWith(github.event.pull_request.head.ref, 'release/')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Calculate next version
+        id: version
+        run: |
+          # Get latest tag
+          TAG=$(git tag -l 'v*' --sort=-v:refname | head -n1)
+          if [ -z "$TAG" ]; then
+            TAG="v0.0.0"
+          fi
+
+          MAJOR=$(echo "$TAG" | sed 's/^v//' | cut -d. -f1)
+          MINOR=$(echo "$TAG" | sed 's/^v//' | cut -d. -f2)
+          PATCH=$(echo "$TAG" | sed 's/^v//' | cut -d. -f3)
+
+          # Determine bump from PR title (conventional commit format)
+          PR_TITLE="${{ github.event.pull_request.title }}"
+
+          if echo "$PR_TITLE" | grep -qiE '^[a-z]+(\(.+\))?!:|BREAKING CHANGE'; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif echo "$PR_TITLE" | grep -qiE '^feat(\(.+\))?:'; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else
+            PATCH=$((PATCH + 1))
+          fi
+
+          NEXT="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "version=$NEXT" >> "$GITHUB_OUTPUT"
+          echo "Next version: $NEXT"
+
+      - name: Check if release branch already exists
+        id: check
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if git ls-remote --heads origin "release/${VERSION}" | grep -q "release/${VERSION}"; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Branch release/${VERSION} already exists"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create release branch
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "release/${VERSION}"
+          git push origin "release/${VERSION}"
+          echo "Created branch release/${VERSION} from develop"
+
+      - name: Create PR to main
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          gh pr create \
+            --title "release: ${VERSION}" \
+            --body "$(cat <<EOF
+          ## Release ${VERSION}
+
+          This release branch was auto-created from \`develop\` after merging PR #${{ github.event.pull_request.number }}.
+
+          ### Checklist before merging
+          - [ ] Version bumps applied (if applicable)
+          - [ ] Changelog reviewed
+          - [ ] Final QA/smoke test passed
+
+          ### After merging
+          A tag \`${VERSION}\` and GitHub Release will be created automatically.
+          EOF
+          )" \
+            --base main \
+            --head "release/${VERSION}"
+          echo "Created PR: release/${VERSION} → main"

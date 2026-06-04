@@ -5,22 +5,22 @@
 # Owners podem ser: @username, @org/team-name, email@example.com
 
 # Default - todos os arquivos
-* @your-org/engineering
+* @egmj
 
 # Infraestrutura e CI/CD
-.github/ @your-org/platform
-docker/ @your-org/platform
-Dockerfile @your-org/platform
-Makefile @your-org/platform
+.github/ @egmj
+docker/ @egmj
+Dockerfile @egmj
+Makefile @egmj
 
 # Documentação
-docs/ @your-org/engineering
-README.md @your-org/engineering
+docs/ @egmj
+README.md @egmj
 
 # Segurança
-.github/workflows/security.yml @your-org/security
-.gitleaks.toml @your-org/security
+.github/workflows/security.yml @egmj
+.gitleaks.toml @egmj
 
 # Configuração do Claude
-.claude/ @your-org/engineering
-CLAUDE.md @your-org/engineering
+.claude/ @egmj
+CLAUDE.md @egmj
