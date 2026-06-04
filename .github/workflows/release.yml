@@ -1,7 +1,5 @@
-# Release workflow — runs when develop is merged into main
-# 1. Calculates the next semantic version from conventional commits
-# 2. Creates a git tag (v1.2.3)
-# 3. Creates a GitHub Release with auto-generated release notes
+# Creates a GitHub Release when a PR from release/v* or hotfix/*
+# is merged into main. The tag already exists (created on develop).
 name: Release
 
 on:
@@ -13,13 +11,13 @@ permissions:
   contents: write
 
 jobs:
-  tag-and-release:
-    name: Tag & GitHub Release
+  github-release:
+    name: GitHub Release
     runs-on: ubuntu-latest
     if: >
       github.event.pull_request.merged == true &&
       (
-        startsWith(github.event.pull_request.head.ref, 'release/') ||
+        startsWith(github.event.pull_request.head.ref, 'release/v') ||
         startsWith(github.event.pull_request.head.ref, 'hotfix/')
       )
     steps:
@@ -27,65 +25,48 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get latest tag
-        id: latest
-        run: |
-          TAG=$(git tag -l 'v*' --sort=-v:refname | head -n1)
-          if [ -z "$TAG" ]; then
-            TAG="v0.0.0"
-          fi
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Latest tag: $TAG"
-
-      - name: Calculate next version
+      - name: Extract version from branch
         id: version
         run: |
-          CURRENT="${{ steps.latest.outputs.tag }}"
-          MAJOR=$(echo "$CURRENT" | sed 's/^v//' | cut -d. -f1)
-          MINOR=$(echo "$CURRENT" | sed 's/^v//' | cut -d. -f2)
-          PATCH=$(echo "$CURRENT" | sed 's/^v//' | cut -d. -f3)
+          BRANCH="${{ github.event.pull_request.head.ref }}"
 
-          # Check commit messages since last tag for version bump type
-          if [ "$CURRENT" = "v0.0.0" ]; then
-            COMMITS=$(git log --oneline --format="%s")
+          if [[ "$BRANCH" == release/v* ]]; then
+            # release/v1.2.3 → v1.2.3
+            TAG="${BRANCH#release/}"
           else
-            COMMITS=$(git log "${CURRENT}..HEAD" --oneline --format="%s")
+            # hotfix/* → get latest tag to create new patch
+            echo "Hotfix branch — tag will be created"
+            TAG=""
           fi
 
-          if echo "$COMMITS" | grep -qiE '^[a-z]+(\(.+\))?!:|BREAKING CHANGE'; then
-            MAJOR=$((MAJOR + 1))
-            MINOR=0
-            PATCH=0
-            echo "bump=major" >> "$GITHUB_OUTPUT"
-          elif echo "$COMMITS" | grep -qiE '^feat(\(.+\))?:'; then
-            MINOR=$((MINOR + 1))
-            PATCH=0
-            echo "bump=minor" >> "$GITHUB_OUTPUT"
-          else
-            PATCH=$((PATCH + 1))
-            echo "bump=patch" >> "$GITHUB_OUTPUT"
-          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-          NEXT="v${MAJOR}.${MINOR}.${PATCH}"
-          echo "version=$NEXT" >> "$GITHUB_OUTPUT"
-          echo "Next version: $NEXT (${MAJOR}.${MINOR}.${PATCH})"
+      - name: Create tag for hotfix (if needed)
+        if: startsWith(github.event.pull_request.head.ref, 'hotfix/')
+        id: hotfix-tag
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          tag_prefix: v
 
-      - name: Create tag
+      - name: Determine final tag
+        id: final
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "${{ steps.version.outputs.version }}" -m "Release ${{ steps.version.outputs.version }}"
-          git push origin "${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          if [ -z "$TAG" ]; then
+            TAG="${{ steps.hotfix-tag.outputs.new_tag }}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          PREVIOUS="${{ steps.latest.outputs.tag }}"
+          TAG="${{ steps.final.outputs.tag }}"
 
-          gh release create "$VERSION" \
-            --title "$VERSION" \
+          gh release create "$TAG" \
+            --title "$TAG" \
             --generate-notes \
             --latest
-          echo "Created release $VERSION"
+          echo "Created GitHub Release: $TAG"

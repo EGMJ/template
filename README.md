@@ -99,25 +99,27 @@ docs: update deployment guide
 | CI | Push, PR | Lint, test, build |
 | PR Validation | PR | Conventional commits, title, size label |
 | Security | Push to main, weekly | CodeQL, Trivy, Gitleaks |
-| Create Release Branch | PR merged to develop | Creates `release/v*` branch + PR to main |
-| Release | PR merged to main (from release/* or hotfix/*) | Tag + GitHub Release |
+| Promote to Release | PR merged to develop | Tag + `release/v*` branch + auto PR to main |
+| Release | PR merged to main (from release/v* or hotfix/*) | GitHub Release |
 | Stale | Daily | Close inactive issues/PRs |
 | Auto PR | Feature branch push | Auto-create draft PRs |
 
 ### Release Flow
 
 ```
-feature/* ──PR──▶ develop ──auto──▶ release/v1.2.0 ──PR──▶ main ──auto──▶ tag v1.2.0 + GitHub Release
-                                                                    │
-hotfix/*  ─────────────────────────────────PR───────────────────────▶┘
+feature/* ──PR──▶ develop ──auto──▶ tag v1.2.3 + release/v1.2.3 ──auto PR──▶ main ──auto──▶ GitHub Release
+                                          (homologação/QA)                     (produção)
+                                                                                    │
+hotfix/*  ──────────────────────────────────PR──────────────────────────────────────▶┘
 ```
 
 1. Develop on `feature/*` branches with conventional commits
 2. Merge PR to `develop`
-3. A `release/v*` branch is auto-created with a PR to `main`
-4. Review, QA, and merge the release PR
-5. Tag and GitHub Release are created automatically
-6. For urgent fixes: `hotfix/*` → PR direct to `main`
+3. Version is calculated automatically, tag `v*` is created
+4. Branch `release/v*` is created + PR to `main` is auto-opened
+5. QA validates on the `release/v*` branch (homologation)
+6. After QA approval, merge to `main` → GitHub Release is created
+7. For urgent fixes: `hotfix/*` → PR direct to `main`
 
 ## Documentation
 
