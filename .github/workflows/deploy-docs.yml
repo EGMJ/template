@@ -1,0 +1,47 @@
+# Deploy documentation site (GitHub Pages)
+# Uncomment and configure when you have a docs site (MkDocs, Docusaurus, etc.)
+name: Deploy Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - ".github/workflows/deploy-docs.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy Documentation
+    runs-on: ubuntu-latest
+    # Uncomment when ready to deploy
+    if: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # MkDocs example:
+      # - uses: actions/setup-python@v5
+      #   with:
+      #     python-version: "3.12"
+      # - run: pip install mkdocs-material
+      # - run: mkdocs build
+      # - uses: actions/upload-pages-artifact@v3
+      #   with:
+      #     path: site
+      # - id: deployment
+      #   uses: actions/deploy-pages@v4
+
+      - name: Placeholder
+        run: echo "Configure docs deployment"

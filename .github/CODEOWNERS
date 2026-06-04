@@ -1,0 +1,26 @@
+# CODEOWNERS - Define quem revisa cada parte do código
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Formato: <pattern> <owners>
+# Owners podem ser: @username, @org/team-name, email@example.com
+
+# Default - todos os arquivos
+* @your-org/engineering
+
+# Infraestrutura e CI/CD
+.github/ @your-org/platform
+docker/ @your-org/platform
+Dockerfile @your-org/platform
+Makefile @your-org/platform
+
+# Documentação
+docs/ @your-org/engineering
+README.md @your-org/engineering
+
+# Segurança
+.github/workflows/security.yml @your-org/security
+.gitleaks.toml @your-org/security
+
+# Configuração do Claude
+.claude/ @your-org/engineering
+CLAUDE.md @your-org/engineering

@@ -1,0 +1,92 @@
+# Continuous Integration - runs on every push and pull request
+# Adapte os jobs abaixo para o runtime do seu projeto (Node, Python, Go, etc.)
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Node.js example ---
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 20
+      #     cache: npm
+      # - run: npm ci
+      # - run: npm run lint
+
+      # --- Python example ---
+      # - uses: actions/setup-python@v5
+      #   with:
+      #     python-version: "3.12"
+      # - run: pip install ruff
+      # - run: ruff check .
+      # - run: ruff format --check .
+
+      - name: Placeholder
+        run: echo "Configure linting for your project"
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Node.js example ---
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 20
+      #     cache: npm
+      # - run: npm ci
+      # - run: npm test
+
+      # --- Python example ---
+      # - uses: actions/setup-python@v5
+      #   with:
+      #     python-version: "3.12"
+      # - run: pip install -e ".[dev]"
+      # - run: pytest --cov
+
+      - name: Placeholder
+        run: echo "Configure tests for your project"
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Node.js example ---
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 20
+      #     cache: npm
+      # - run: npm ci
+      # - run: npm run build
+
+      # --- Docker example ---
+      # - uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     push: false
+      #     tags: ${{ github.repository }}:test
+
+      - name: Placeholder
+        run: echo "Configure build for your project"

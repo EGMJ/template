@@ -1,0 +1,53 @@
+# Auto-create PR when a branch is pushed
+name: Auto PR
+
+on:
+  push:
+    branches:
+      - "feature/**"
+      - "feat/**"
+      - "fix/**"
+      - "hotfix/**"
+      - "chore/**"
+      - "docs/**"
+      - "refactor/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  create-pr:
+    name: Create Pull Request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v6
+        id: check-pr
+        continue-on-error: true
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create PR via gh
+        if: steps.check-pr.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+
+          EXISTING_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number')
+          if [ -n "$EXISTING_PR" ]; then
+            echo "PR #$EXISTING_PR already exists for branch $BRANCH"
+            exit 0
+          fi
+
+          PR_TITLE=$(echo "$BRANCH" | sed 's|.*/||' | tr '-' ' ')
+          gh pr create \
+            --title "$PR_TITLE" \
+            --body "Auto-generated PR for branch \`$BRANCH\`" \
+            --base "$DEFAULT_BRANCH" \
+            --head "$BRANCH" \
+            --draft
