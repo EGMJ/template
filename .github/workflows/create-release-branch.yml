@@ -21,7 +21,7 @@ jobs:
       github.event.pull_request.merged == true &&
       !startsWith(github.event.pull_request.head.ref, 'release/')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: develop
           fetch-depth: 0
