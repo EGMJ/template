@@ -1,0 +1,17 @@
+# docker-compose.override.yml - Overrides locais para desenvolvimento
+# Copie para docker-compose.override.yml e ajuste conforme necessário
+# Este arquivo é automaticamente carregado pelo Docker Compose
+# e NÃO deve ser commitado (.gitignore inclui ele)
+version: "3.9"
+
+services:
+  app:
+    build:
+      target: builder
+    volumes:
+      - ..:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DEBUG=*
+    command: npm run dev

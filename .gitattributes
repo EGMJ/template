@@ -1,0 +1,64 @@
+# Auto-detect text files and normalize line endings
+* text=auto eol=lf
+
+# Explicitly declare text files
+*.md text diff=markdown
+*.txt text
+*.csv text
+*.sql text
+*.json text
+*.yml text
+*.yaml text
+*.xml text
+*.html text diff=html
+*.css text diff=css
+*.js text diff=javascript
+*.ts text diff=javascript
+*.jsx text diff=javascript
+*.tsx text diff=javascript
+*.py text diff=python
+*.rb text diff=ruby
+*.go text diff=golang
+*.rs text diff=rust
+*.java text diff=java
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+*.fish text eol=lf
+
+# Docker
+Dockerfile text
+docker-compose*.yml text
+
+# CI/CD
+Makefile text eol=lf
+Procfile text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary
+
+# Lock files - exact format
+yarn.lock text -diff
+package-lock.json text -diff linguist-generated
+pnpm-lock.yaml text -diff linguist-generated
+Pipfile.lock text -diff linguist-generated
+poetry.lock text -diff linguist-generated
+Cargo.lock text -diff linguist-generated
+go.sum text -diff linguist-generated
+
+# Generated files
+*.min.js text linguist-generated
+*.min.css text linguist-generated

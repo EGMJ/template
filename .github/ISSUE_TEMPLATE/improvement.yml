@@ -1,0 +1,34 @@
+name: Improvement
+description: Suggest an improvement to existing functionality
+title: "[Improvement]: "
+labels: ["improvement"]
+body:
+  - type: textarea
+    id: current
+    attributes:
+      label: Current Behavior
+      description: How does it work today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed Improvement
+      description: How should it work instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why is this improvement needed? What's the impact?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Related issues, benchmarks, screenshots, etc.

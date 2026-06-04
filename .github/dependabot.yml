@@ -1,0 +1,67 @@
+# Dependabot - Atualização automática de dependências
+# Docs: https://docs.github.com/en/code-security/dependabot
+version: 2
+
+updates:
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - github-actions
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
+      include: scope
+
+  # --- Descomente o ecossistema do seu projeto ---
+
+  # Node.js (npm)
+  # - package-ecosystem: npm
+  #   directory: /
+  #   schedule:
+  #     interval: weekly
+  #     day: monday
+  #   labels:
+  #     - dependencies
+  #     - javascript
+  #   groups:
+  #     production:
+  #       dependency-type: production
+  #     development:
+  #       dependency-type: development
+  #   commit-message:
+  #     prefix: "chore"
+  #     include: scope
+  #   open-pull-requests-limit: 10
+
+  # Python (pip)
+  # - package-ecosystem: pip
+  #   directory: /
+  #   schedule:
+  #     interval: weekly
+  #     day: monday
+  #   labels:
+  #     - dependencies
+  #     - python
+  #   commit-message:
+  #     prefix: "chore"
+  #     include: scope
+
+  # Docker
+  # - package-ecosystem: docker
+  #   directory: /
+  #   schedule:
+  #     interval: weekly
+  #   labels:
+  #     - dependencies
+  #     - docker
+  #   commit-message:
+  #     prefix: "chore"
+  #     include: scope
